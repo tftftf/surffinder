@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Surf Finder</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+         background: linear-gradient(135deg, #0b2545 0%, #13607c 60%, #19a0a8 100%); color: #fff; }
+  .card { text-align: center; padding: 40px 32px; max-width: 420px; }
+  .logo { font-size: 56px; }
+  h1 { margin: 8px 0 4px; font-size: 32px; letter-spacing: -0.5px; }
+  p { opacity: .85; line-height: 1.5; }
+  .spin { width: 28px; height: 28px; margin: 20px auto 0; border: 3px solid rgba(255,255,255,.3);
+          border-top-color: #fff; border-radius: 50%; animation: s 1s linear infinite; }
+  @keyframes s { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🏄</div>
+  <h1>Surf Finder</h1>
+  <p id="msg">Opening Surf Finder — click <b>Confirm my email</b> there to finish.</p>
+  <div class="spin" id="spin"></div>
+</div>
+<script>
+  // Confirmation emails need a fixed link; the app's tunnel address changes.
+  // Forward the token to wherever the app is right now (url.json). The app only
+  // uses the token when "Confirm my email" is clicked, so mail scanners that
+  // open this link don't burn it.
+  var token = new URLSearchParams(location.search).get("token") || "";
+  var out = new URLSearchParams({ verify: token });
+  fetch("url.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.url) throw new Error("no url");
+      location.replace(d.url.replace(/\/+$/, "") + "/?" + out.toString());
+    })
+    .catch(function () {
+      document.getElementById("spin").remove();
+      document.getElementById("msg").textContent =
+        "The app is offline right now. Your link still works for 24 hours — try again later.";
+    });
+</script>
+</body>
+</html>
